@@ -24,6 +24,7 @@ if [ -z "$bc_check" ]; then
     exit 1
 fi
 
+# CHECK FOR BANNER IF OPTION IS SELECTED
 if [ "$1" == "-b" ]; then
     banner_check=$(whereis banner | grep "/usr/bin")
     if [ -z "$banner_check" ]; then
@@ -31,6 +32,7 @@ if [ "$1" == "-b" ]; then
 	exit 1
     fi
 fi
+
 
 # FIND NUMBER OF BATTERIES
 battery_list=$(ls /sys/class/power_supply/ | grep -i "BAT")
