@@ -4,7 +4,6 @@
 # This script prints out your battery level in percentage                                  #
 # AUTHOR: Kevin Vece                                                                       #
 #                                                                                          #
-# Requirements: bc (calculator)                                                            #
 # Tested on Ubuntu 12.04, Archlinux                                                        #
 #                                                                                          #
 # Usage: batstat [-b]                                                                      #
@@ -16,13 +15,6 @@
 ############################################################################################
 
 
-# CHECK FOR BC CALCULATOR
-bc_check=$(whereis bc | grep "/usr/bin")
-if [ -z "$bc_check" ]; then
-    printf "You do not have bc installed. Exiting"; sleep 1; printf "."; sleep 1
-    printf "."; sleep 1; printf ".\n"
-    exit 1
-fi
 
 # CHECK FOR BANNER IF OPTION IS SELECTED
 if [ "$1" == "-b" ]; then
@@ -56,8 +48,8 @@ while [ $num_batts -gt 0 ]; do
     charge_status=$(echo $charge_status | sed -e "s_[A-Za-z][A-Za-z ]*:__g" -e "s_ __g")
 
     # PRINT OUT BATTERY PERCENTAGE AND CHARGING STATUS
-    curr_times_100=$(echo $current_battery_level*100 | bc)
-    battery_percent=$(echo $curr_times_100/$max_battery_level | bc)
+    let curr_times_100=$current_battery_level*100
+    let battery_percent=$curr_times_100/$max_battery_level
     if [ "$1" == "-b" ]; then
 	echo
 	banner "$line $battery_percent%"
