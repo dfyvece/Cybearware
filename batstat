@@ -18,10 +18,18 @@
 
 # CHECK FOR BC CALCULATOR
 bc_check=$(whereis bc | grep "/usr/bin")
-if [ -n "$bc_check" ]; then
+if [ -z "$bc_check" ]; then
     printf "You do not have bc installed. Exiting"; sleep 1; printf "."; sleep 1
     printf "."; sleep 1; printf ".\n"
     exit 1
+fi
+
+if [ "$1" == "-b" ]; then
+    banner_check=$(whereis banner | grep "/usr/bin")
+    if [ -z "$banner_check" ]; then
+	printf "You need banner installed to you the -b option. Exiting..."
+	exit 1
+    fi
 fi
 
 # FIND NUMBER OF BATTERIES
