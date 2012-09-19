@@ -10,7 +10,7 @@
 #                                                                                          #
 # Options:                                                                                 #
 # -b     show a banner of the battery percentage for each battery                          #
-#        this option requires the banner program is installed from the svbanner package    #
+#        this option requires the banner program is installed from the svsbanner package   #
 #                                                                                          #
 ############################################################################################
 
@@ -33,6 +33,7 @@ num_batts=$(echo $battery_list | wc -l)
 # LOOP THROUGH BATTERIES
 while [ $num_batts -gt 0 ]; do
 
+    # GET CURRENT BATTERY
     line=$(echo $battery_list | tail -n $num_batts | head -n 1)
     
     # GET THE CURRENT BATTERY LEVEL
@@ -52,9 +53,12 @@ while [ $num_batts -gt 0 ]; do
     let battery_percent=$curr_times_100/$max_battery_level
     if [ "$1" == "-b" ]; then
 	echo
-	banner "$line $battery_percent%"
+	banner "$(echo "$line" | sed -e "s_BAT_Battery _")"
+	banner "  $battery_percent%"
     fi
-    echo "$line is at $battery_percent% and $charge_status"
+    echo "$line is at $battery_percent% and $charge_status" | sed -e "s_BAT_Battery #_" >&1
+
+    # DECREMENT COUNTER
     let num_batts=$num_batts-1
 
 done 
