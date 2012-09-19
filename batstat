@@ -21,7 +21,6 @@
 battery_list=$(ls /sys/class/power_supply/ | grep -i "BAT")
 num_batts=$(echo $battery_list | wc -l)
 
-
 # LOOP THROUGH BATTERIES
 while [ $num_batts -gt 0 ]; do
 
