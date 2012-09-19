@@ -18,24 +18,11 @@
 
 # CHECK FOR BC CALCULATOR
 bc_check=$(whereis bc | grep "/usr/bin")
-if [ -z "$bc_check" ]; then
-    echo "You do not have bc installed. Do you want to install? [y/n] "
-    read ans
-    if [ "$ans" == "y" -o "$ans" == "Y" ]; then
-	if [ $(whoami) != "root" ]; then
-	    echo "Need to be root to install"
-	    exit 1
-	fi
-	system_type=$(uname -a)
-	sys_tmp=$(echo $system_type | grep -i "Arch")
-	if [ -n "$sys_tmp" ]; then
-	    pacman -S bc
-	fi
-    else
-	exit 1
-    fi
+if [ -n "$bc_check" ]; then
+    printf "You do not have bc installed. Exiting"; sleep 1; printf "."; sleep 1
+    printf "."; sleep 1; printf ".\n"
+    exit 1
 fi
-    
 
 # FIND NUMBER OF BATTERIES
 battery_list=$(ls /sys/class/power_supply/ | grep -i "BAT")
