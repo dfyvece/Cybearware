@@ -20,7 +20,7 @@ bc_check=$(whereis bc | grep "/usr/bin")
 if [ -z "$bc_check" ]; then
     echo "You do not have bc installed. Do you want to install? [y/n] "
     read ans
-    ans=$(sed "s_[A-Za-z][^ ]*_\1_")
+    ans=$(sed "s_\([A-Za-z]\)\([^ ]*\)_\1_")
     if [ "$ans" == "y" -o "$ans" == "Y" ]; then
 	system_type=$(uname -a)
 	sys_tmp=$(echo $system_type | grep -i "Arch")
