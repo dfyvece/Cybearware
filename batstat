@@ -6,18 +6,44 @@
 #                                                                                          #
 # Tested on Ubuntu 12.04, Archlinux                                                        #
 #                                                                                          #
-# Usage: batstat [-b]                                                                      #
+# Usage: batstat [-b -r]                                                                   #
 #                                                                                          #
 # Options:                                                                                 #
 # -b     show a banner of the battery percentage for each battery                          #
 #        this option requires the banner program is installed from the svsbanner package   #
+# -r     constantly display the battery information for each battery, best used with -b    #
 #                                                                                          #
 ############################################################################################
 
 
+# OPTION FLAGS
+is_refreshing=0
+is_banner=0
+
+# INTERPRET INPUT OPTIONS
+while [ -n "$1" ]; do
+    case "$1" in
+	-r )
+	    is_refreshing=1
+	    shift
+	    ;;
+	-b )
+	    is_banner=1
+	    shift
+	    ;;
+	-rb | -br )
+	    is_refreshing=1
+	    is_banner=1
+	    shift
+	    ;;
+	* )
+	    echo "Invalid option"
+	    exit 1
+    esac
+done
 
 # CHECK FOR BANNER IF OPTION IS SELECTED
-if [ "$1" == "-b" ]; then
+if [ "$is_banner" -eq 1 ]; then
     banner_check=$(whereis banner | grep "/usr/bin")
     if [ -z "$banner_check" ]; then
 	printf "You need banner installed to you the -b option. Exiting..."
@@ -26,41 +52,56 @@ if [ "$1" == "-b" ]; then
 fi
 
 
-# FIND NUMBER OF BATTERIES
-battery_list=$(ls /sys/class/power_supply/ | grep -i "BAT")
-num_batts=$(echo $battery_list | wc -l)
+# FUNCTION USED TO RETREIVE INFO FROM THE SYSTEM AND DISPLAY
+function display_info() {
 
-# LOOP THROUGH BATTERIES
-while [ $num_batts -gt 0 ]; do
-
-    # GET CURRENT BATTERY
-    line=$(echo $battery_list | tail -n $num_batts | head -n 1)
+    # FIND NUMBER OF BATTERIES
+    battery_list=$(ls /sys/class/power_supply/ | grep -i "BAT")
+    num_batts=$(echo $battery_list | wc -l)
+    i=$num_batts
     
-    # GET THE CURRENT BATTERY LEVEL
-    battery_line=$(cat /sys/class/power_supply/$line/uevent | grep -i "ENERGY_NOW=")
-    current_battery_level=$(echo $battery_line | sed "s_[^0-9]*__g")
+     # LOOP THROUGH BATTERIES
+    while [[ ( "$i" -gt 0 ) || ( "$is_refreshing" -eq 1 ) ]]; do
 
-    # GET THE MAXIMUM BATTERY LEVEL
-    battery_line=$(cat /sys/class/power_supply/$line/uevent | grep -i "ENERGY_FULL=")
-    max_battery_level=$(echo $battery_line | sed "s_[^0-9]*__g")
+        # GET CURRENT BATTERY
+	line=$(echo $battery_list | tail -n $num_batts | head -n 1);
+	
+        # GET THE CURRENT BATTERY LEVEL
+	battery_line=$(cat /sys/class/power_supply/$line/uevent | grep -i "ENERGY_NOW=")
+	current_battery_level=$(echo $battery_line | sed "s_[^0-9]*__g")
 
-    # GET CHARGING STATUS
-    charge_status=$(cat /sys/class/power_supply/$line/status)
-    charge_status=$(echo $charge_status | sed -e "s_[A-Za-z][A-Za-z ]*:__g" -e "s_ __g")
+        # GET THE MAXIMUM BATTERY LEVEL
+	battery_line=$(cat /sys/class/power_supply/$line/uevent | grep -i "ENERGY_FULL=")
+	max_battery_level=$(echo $battery_line | sed "s_[^0-9]*__g")
 
-    # PRINT OUT BATTERY PERCENTAGE AND CHARGING STATUS
-    let curr_times_100=$current_battery_level*100
-    let battery_percent=$curr_times_100/$max_battery_level
-    if [ "$1" == "-b" ]; then
-	echo
-	banner "$(echo "$line" | sed -e "s_BAT_Battery _")"
-	banner "  $battery_percent%"
-    fi
-    echo "$line is at $battery_percent% and $charge_status" | sed -e "s_BAT_Battery #_" >&1
+        # GET CHARGING STATUS
+	charge_status=$(cat /sys/class/power_supply/$line/status)
+	charge_status=$(echo $charge_status | sed -e "s_[A-Za-z][A-Za-z ]*:__g" -e "s_ __g")
 
-    # DECREMENT COUNTER
-    let num_batts=$num_batts-1
+        # PRINT OUT BATTERY PERCENTAGE AND CHARGING STATUS
+	let curr_times_100=$current_battery_level*100
+	let battery_percent=$curr_times_100/$max_battery_level
+	if [[ "$is_banner" -eq 1 ]]; then
+	    echo
+	    banner "$(echo "$line" | sed -e "s_BAT_Battery _")"
+	    banner "  $battery_percent%"
+	fi
+	echo "$line is at $battery_percent% and $charge_status" | sed -e "s_BAT_Battery #_" >&1
 
-done 
+        # DECREMENT COUNTER
+	if [[ ( "$is_refreshing" -eq 1 ) && ( "$i" -lt 2 ) ]]; then
+	    i=$num_batts
+	    sleep 1
+	    clear
+	else
+	    let i=$i-1
+	fi
 
-echo
+    done 
+
+    echo
+
+}
+
+clear
+display_info
