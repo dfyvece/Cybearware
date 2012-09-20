@@ -91,7 +91,12 @@ function display_info() {
         # DECREMENT COUNTER
 	if [[ ( "$is_refreshing" -eq 1 ) && ( "$i" -lt 2 ) ]]; then
 	    i=$num_batts
-	    sleep 1
+	    char=
+	    read -t 10 -n 1 char
+	    if [[ "$char" == "q" || "$char" == "Q" ]]; then
+		echo
+		exit 0
+	    fi
 	    clear
 	else
 	    let i=$i-1
