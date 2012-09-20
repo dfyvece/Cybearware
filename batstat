@@ -61,7 +61,7 @@ function display_info() {
     i=$num_batts
     
      # LOOP THROUGH BATTERIES
-    while [[ ( "$i" -gt 0 ) || ( "$is_refreshing" -eq 1 ) ]]; do
+    while [[ "$i" -gt 0  ]]; do
 
         # GET CURRENT BATTERY
 	line=$(echo $battery_list | tail -n $num_batts | head -n 1);
