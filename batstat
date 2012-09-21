@@ -53,9 +53,9 @@ fi
 
 # FUNCTION USED TO CHECK USER INPUT
 function check_input() {
-    char=
-    read -t 6 -n 1 char
-    case "$char" in
+    ans=
+    read -t 6 -s -n 1 ans
+    case "$ans" in
 	q | Q )
 	    echo
 	    exit 0
