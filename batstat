@@ -123,5 +123,7 @@ function display_info() {
 
 }
 
-clear
+if [[ "$is_refreshing" -eq 1 ]]; then
+    clear
+fi
 display_info
