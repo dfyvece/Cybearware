@@ -51,26 +51,18 @@ if [ "$is_banner" -eq 1 ]; then
     fi
 fi
 
-# FUNCTION USED TO CHECK USER INPUT
-function check_input() {
-    ans=
-    read -t 6 -s -n 1 ans
-    case "$ans" in
-	q | Q )
-	    echo
-	    exit 0
+# CHECK IF REFRESHING OPTION IS SELECTED
+if [[ "$is_refreshing" -eq 1 ]]; then
+    case "$is_banner" in
+	0 )
+	    watch -n 1 batstat
 	    ;;
-	b | B )
-	    case "$is_banner" in
-		0 )
-		    is_banner=1
-		    ;;
-		* )
-		    is_banner=0
-		    ;;
-	    esac
+	* )
+	    watch -n 1 batstat -b
+	    ;;
     esac
-}
+fi
+	    
 
 # FUNCTION USED TO RETREIVE INFO FROM THE SYSTEM AND DISPLAY
 function display_info() {
@@ -109,13 +101,7 @@ function display_info() {
 	echo "$line is at $battery_percent% and $charge_status" | sed -e "s_BAT_Battery #_" >&1
 
         # DECREMENT COUNTER
-	if [[ ( "$is_refreshing" -eq 1 ) && ( "$i" -lt 2 ) ]]; then
-	    i=$num_batts
-	    check_input
-	    clear
-	else
-	    let i=$i-1
-	fi
+	let i=$i-1
 
     done 
 
@@ -123,7 +109,4 @@ function display_info() {
 
 }
 
-if [[ "$is_refreshing" -eq 1 ]]; then
-    clear
-fi
 display_info
